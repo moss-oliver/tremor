@@ -1,0 +1,18 @@
+[package]
+name = "tremor"
+version = "0.1.0"
+authors = ["Oliver Moss <moss.oliver@gmail.com>"]
+
+[dependencies]
+
+[dependencies.lib_tremor_common]
+path = "../lib_tremor_common"
+
+[dependencies.lib_foundry_platform]
+path = "../lib_foundry_platform"
+
+[dependencies.lib_foundry_common]
+path = "../lib_foundry_common"
+
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath"

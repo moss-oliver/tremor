@@ -1,0 +1,13 @@
+[package]
+name = "lib_foundry_win32"
+version = "0.1.0"
+authors = ["Oliver Moss <moss.oliver@gmail.com>"]
+
+[dependencies]
+winapi = "*"
+user32-sys="*"
+kernel32-sys="*"
+gdi32-sys="*"
+
+[dependencies.lib_foundry_common]
+path = "../lib_foundry_common"

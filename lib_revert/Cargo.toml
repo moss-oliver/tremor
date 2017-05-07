@@ -1,0 +1,12 @@
+[package]
+name = "lib_revert"
+version = "0.1.0"
+authors = ["Oliver Moss <moss.oliver@gmail.com>"]
+
+[dependencies]
+
+[dependencies.lib_math]
+path = "../lib_math"
+
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath"

@@ -1,0 +1,11 @@
+[package]
+name = "lib_math"
+version = "0.1.0"
+authors = ["Oliver Moss <moss.oliver@gmail.com>"]
+
+[dependencies]
+num-traits = "0.1"
+clippy = {version = "*", optional = true}
+
+[features]
+default = []

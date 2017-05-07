@@ -1,0 +1,12 @@
+[package]
+name = "lib_tremor_common"
+version = "0.1.0"
+authors = ["Oliver Moss <moss.oliver@gmail.com>"]
+
+[dependencies]
+
+[dependencies.lib_revert]
+path = "../lib_revert"
+
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath"

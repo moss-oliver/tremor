@@ -1,0 +1,10 @@
+{
+    "rust.racerPath": "C:\\Users\\mosso\\.cargo\\bin\\racer.exe", // Specifies path to Racer binary if it's not in PATH
+    "rust.rustLangSrcPath": "C:\\Personal\\rust\\src", // Specifies path to /src directory of local copy of Rust sources
+    "rust.rustfmtPath": "C:\\Users\\mosso\\.cargo\\bin\\rustfmt.exe", // Specifies path to Rustfmt binary if it's not in PATH
+    "rust.cargoPath": "C:\\Users\\mosso\\.cargo\\bin\\cargo.exe", // Specifies path to Cargo binary if it's not in PATH
+    "rust.cargoHomePath": null, // Path to Cargo home directory, mostly needed for racer. Needed only if using custom rust installation.
+    "rust.formatOnSave": false, // Turn on/off autoformatting file on save (EXPERIMENTAL)
+    "rust.checkOnSave": false, // Turn on/off `cargo check` project on save (EXPERIMENTAL)
+    "rust.checkWith": "build" // Specifies the linter to use. (EXPERIMENTAL)
+}
