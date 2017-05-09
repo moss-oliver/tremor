@@ -21,7 +21,6 @@ use lib_revert::pixel_shader::ColorPixelShader;
 use lib_revert::util::Color;
 use lib_revert::buffer::ColorBuffer;
 use lib_revert::util::ColoredVertex;
-//use lib_revert::util::None;
 use lib_revert::buffer::DepthBufferF32;
 use lib_revert::pixel_masker::DepthPixelMasker;
 use lib_revert::buffer::WritableBuffer;
@@ -47,41 +46,6 @@ pub mod file_utils;
 pub mod file_bsp;
 pub mod file_lmp;
 
-pub trait Component {
-    fn as_any(&self) -> &Any;
-}
-
-pub struct Renderable {
-    
-}
-
-impl Component for Renderable {
-    fn as_any(&self) -> &Any {
-        self
-    }
-}
-
-pub struct Object {
-    name: String,
-    components:Vec<Rc<RefCell<Component>>>
-}
-
-
-
-pub struct Space {
-    name: String,
-    objects: Vec<Object>
-}
-
-impl Space {
-    pub fn new(name: String) -> Space {
-        Space {
-            name: name,
-            objects: Vec::new()
-        }
-    }
-}
-
 pub struct State {
     level: file_bsp::Bsp,
     color_lump: ColorLump,
@@ -90,7 +54,6 @@ pub struct State {
     depthbuffer: Box<DepthBufferF32>,
     backbuffer: Box<ColorBuffer>,
     location: cgmath::Vector3<f32>,
-//    rotation: cgmath::Quaternion<f32>
     pitch:f32,
     yaw:f32
 }
@@ -180,7 +143,7 @@ pub fn init() -> State {
         pipeline2: pipe2,
         depthbuffer: Box::new(DepthBufferF32::new(512,512)),
         backbuffer: Box::new(ColorBuffer::new(512,512)),
-        location: cgmath::Vector3::new(-117.0, 129.55736, -183.12213),//(0.0,0.0,2.0),
+        location: cgmath::Vector3::new(0.0,0.0,2.0),
         pitch: 52.0,
         yaw: 180.0
     }
@@ -255,25 +218,16 @@ pub fn render_frame(state: &mut State)
         cgmath::Matrix4::from_angle_y(cgmath::Deg(state.yaw)) *
         cgmath::Matrix4::from_angle_z(cgmath::Deg(0.0))
     ;
-    let pos = cgmath::Matrix4::from_translation(state.location) ;//* cgmath::Matrix4::from_diagonal(cgmath::Vector4::new(0.01,-0.01,0.01,0.01));
+    let pos = cgmath::Matrix4::from_translation(state.location) ;
     let view = rot * pos * flip;
     let proj = cgmath::perspective(cgmath::Deg(75.0),1.0,0.01,2000.0);
 
-    //state.pipeline.vs.world_proj = (proj * view);
-    //state.pipeline.vs
     if let Some(ref mut x) = state.pipeline.vs {
         x.world_proj = (proj * view);
     }
     if let Some(ref mut x) = state.pipeline2.vs {
         x.world_proj = (proj * view);
     }
-    //state.pipeline2.vs.world_proj = (proj * view);
-    /*match state.pipeline.vs {
-        Some(expr) => {
-            expr.world_proj = (proj * view);
-        },
-        None => {},
-    }*/
 
     state.backbuffer.as_mut().clear(Color::new(0,0,0));
     state.depthbuffer.as_mut().clear(1.0);
@@ -312,7 +266,6 @@ pub fn render_frame(state: &mut State)
     }
     {
         for vert_count in 0..(state.level.vertices.len()-2)/3 {
-        //for vert_count in 0..100 {
             let vert1 = state.level.vertices[vert_count];
             let vert2 = state.level.vertices[vert_count+1];
             let vert3 = state.level.vertices[vert_count+2];
@@ -484,28 +437,11 @@ pub struct BackbufferDetails {
 }
 pub fn get_backbuffer_details(renderer: &State) -> BackbufferDetails {
     let bb = renderer.backbuffer.as_ref();
-    //let ps = renderer.pipeline2.ps.clone().unwrap();
-    //ps.texture.
-
-    //SimpleTextureSampler ts = 
-        //SimpleTextureSampler::new(state.level.texture_list[0 as usize].clone(), state.color_lump.clone(), 0,lightmap_size_s, lightmap_size_t);
-
-    //
-    //let bb = ps.texture;
-    //let bb = renderer.level.texture_list[0].clone();
-    /*let mut cb = ColorBuffer::new(bb.get_width(), bb.get_height());
-    for y in 0..cb.get_height() {
-        for x in 0..cb.get_width() {
-            cb.set_pixel(x,y,bb.get_pixel(x,y));
-        }
-    }*/
+    
     BackbufferDetails {
         size_x: bb.get_width(),
         size_y: bb.get_height(),
         backbuffer: bb.get_ptr()
-        /*size_x: cb.get_width(),
-        size_y: cb.get_height(),
-        backbuffer: cb.get_ptr()*/
     }
 }
 
@@ -551,7 +487,7 @@ impl Buffer for LightmapSampler {
 
 #[derive(Clone)]
 struct SimpleTextureSampler {
-    texture: Arc<Texture>, //buffer: Arc<Vec<u8>>,
+    texture: Arc<Texture>,
     color_lump: ColorLump,
     offset: usize,
     w:u32,
@@ -582,10 +518,5 @@ impl Buffer for SimpleTextureSampler {
         let index = self.texture.mip1[(((x as usize)+(y*self.w) as usize))];
 
         return self.color_lump.data[index as usize];
-        /*return Color {
-            r: self.color_lump.[((index*3)+0],
-            g: self.color_lump[((index*3)+1],
-            b: self.color_lump[((index*3)+2]
-        }*/
     }
 }

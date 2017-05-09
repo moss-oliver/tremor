@@ -1,5 +1,3 @@
-//use Vec2u32;
-//use Vec3f32;
 use cgmath::Vector4;
 use buffer::WritableBuffer;
 use std::cmp;
@@ -10,6 +8,7 @@ use pixel_shader::PixelShader;
 use pixel_masker::PixelMasker;
 use pixel_masker::NonePixelMasker;
 use std::mem;
+
 //Templates: Vertex, Vertex Shader, Rasterize Vertex, Pixel Shader, Back Buffer pixel type, Masker pixel
 pub struct Pipeline<V, VS, RV, PS, BP, MS, MP> where V: Sized, VS: VertexShader<V=V,R=RV>, RV:Rasterizable, PS: PixelShader<R=RV, P=BP>, BP: Sized+Clone, MS: PixelMasker<V=RV,P=MP>, MP: Sized+Clone {
     pub vs:Option<VS>,
@@ -23,7 +22,6 @@ impl<V, VS, RV, PS, BP, MS, MP> Pipeline<V, VS, RV, PS, BP, MS, MP> where V: Siz
             vs: Option::Some(vs),
             ps: Option::Some(ps),
             masker: Option::Some(ms)
-            //masker: NonePixelMasker::<RV>::new()
         }
     }
 
@@ -79,15 +77,6 @@ fn max<T:PartialOrd>(a:T,b:T)->T { if a>b{a}else{b}}
 
 impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV, PS, BB, BP, MS, MB, MP> where V: Sized, VS: VertexShader<V=V,R=RV>, RV:Rasterizable, PS: PixelShader<R=RV, P=BP>, BB: WritableBuffer<T=BP>, BP: Sized+Clone, MS: PixelMasker<V=RV,P=MP>, MB: WritableBuffer<T=MP> + 'a, MP: Sized+Clone {
     
-    //pub fn clear(&mut self, clear_val: BP) {
-        //for x in 0..self.buff.get_width() {
-        //    for y in 0..self.buff.get_height() {
-        //        self.buff.set_pixel(x,y, clear_val.clone());
-        //    }
-        //}
-    //    self.buff.clear(clear_val);
-    //}
-
     pub fn draw_point(&mut self, vertex: V) -> u32 {
         let vert1 = self.vs.transform(vertex);
         let p1 = vert1.get_position().truncate() * (1.0 /vert1.get_position().w.abs());
@@ -127,79 +116,6 @@ impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV,
         if p1.z < 0.0 && p2.z < 0.0 {
             return 0;
         }
-        /*
-        let size_x = self.buff.get_width() as f32;
-        let size_y = self.buff.get_height() as f32;
-
-
-        let x1 = (((p1.x+1.0) * size_x /2.0) ) as i32;
-        let y1 = (((p1.y+1.0) * size_y /2.0) ) as i32;
-        let x2 = (((p2.x+1.0) * size_x /2.0) ) as i32;
-        let y2 = (((p2.y+1.0) * size_y /2.0) ) as i32;
-
-        if x1 < 0 && x2 < 0 {
-            return 0;
-        }
-        if y1 < 0 && y2 < 0 {
-            return 0;
-        }
-        if x1 as u32 > self.buff.get_width() && x2 as u32 > self.buff.get_width() {
-            return 0;
-        }
-        if y1 as u32 > self.buff.get_width() && y2 as u32 > self.buff.get_width() {
-            return 0;
-        }
-        // Deltas
-        let dx = (x2 - x1) as i32;
-        let dy = (y2 - y1) as i32;
-        
-        let mut count = 0;
-        //if dx > dy {
-        /*for x in cmp::min(x1,x2)..cmp::max(x1,x2) {
-            if x > 0 && x < self.buff.get_width() as i32-1 {
-                //println!("x: {:?}", x);
-                let y = y1 + dy * (x- cmp::min(x1,x2)) / dx;
-                if y > 0 && y < self.buff.get_height() as i32-1 {
-                    let diff = x as f32 / ((cmp::max(x1.abs(),x2.abs())-cmp::min(x1.abs(),x2.abs())) as f32) ;
-                    let vert = vert1.scale(diff).add(&vert2.scale(1.0-diff));
-                    count += PipelineSession::<'a, V, VS, RV, PS, BB, BP, MS, MB, MP>::render_point(vert, x as u32, y as u32, &mut self.buff, &self.ps, &mut self.test_buff, &self.masker);
-                }
-            }
-        }*/
-        let px1 = cmp::min(x1,x2);
-        let px2 = cmp::max(x1,x2);
-        let py1 = cmp::min(y1,y2);
-        let py2 = cmp::max(y1,y2);
-
-        let D = 2*dy - dx;
-        let y = py1
-        for x in px1..px2 {
-            let vert = vert1.scale(diff).add(&vert2.scale(1.0-diff));
-            count += PipelineSession::<'a, V, VS, RV, PS, BB, BP, MS, MB, MP>::render_point(vert, x as u32, y as u32, &mut self.buff, &self.ps, &mut self.test_buff, &self.masker);
-
-        }
-
-        D = 2*dy - dx
-        y = y0
-
-        for x from x0 to x1
-            plot(x,y)
-            if D > 0
-                y = y + 1
-                D = D - dx
-            end if
-            D = D + dy
-        //}
-        //for x from x1 to x2 {
-        //y = y1 + dy * (x - x1) / dx
-        //plot(x, y)
-        //}
-
-        //let vert = vert1.scale(bary1).add(&vert2.scale(bary2).add(&vert3.scale(bary3)));
-
-        //count += PipelineSession::<'a, V, VS, RV, PS, BB, BP, MS, MB, MP>::render_point(vert, x as u32, y as u32, &mut self.buff, &self.ps, &mut self.test_buff, &self.masker);
-*/
-
         let steep = (p2.y - p1.y).abs() > (p2.x - p1.x).abs();
 
         let px1 = (((p1.x+1.0) * size_x /2.0) );
@@ -264,8 +180,6 @@ impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV,
         let vert2 = self.vs.transform(tri.p2);
         let vert3 = self.vs.transform(tri.p3);
         
-        //let p1_sign = 
-
         let mut p1 = vert1.get_position().truncate() * (1.0 /vert1.get_position().w.abs());
         let mut p2 = vert2.get_position().truncate() * (1.0 /vert2.get_position().w.abs());
         let mut p3 = vert3.get_position().truncate() * (1.0 /vert3.get_position().w.abs());
@@ -326,11 +240,6 @@ impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV,
 
         let area_sq = x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2);
 
-        //match backface_culling {
-        //    BackfaceCulling::Back => {if area_sq <= 0 {return;}},
-        //    BackfaceCulling::Front => {if area_sq >= 0 {return;}},
-        //    BackfaceCulling::Both => {}
-        //}
         let rotation = area_sq > 0.0;
 
         // Scan through bounding rectangle
@@ -361,7 +270,6 @@ impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV,
                 } else {
                     if cx1 <= 0.0 && cx2 <= 0.0 && cx3 <= 0.0 {
                         //is visible
-                        //count +=1;
                         
                         let area_1_sq = x*(y2-y3)+x2*(y3-y)+x3*(y-y2);
                         let area_2_sq = x1*(y-y3)+x*(y3-y1)+x3*(y1-y);
@@ -388,7 +296,7 @@ impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV,
     
     fn render_point(vert: RV, x:u32, y:u32, buff: &mut BB, shader: &PS, test_buff: &mut MB, masker: &MS) -> u32 {
         {
-            let vert_pos = vert.get_position() ;//.truncate() * (1.0 /vert.get_position().w.abs());
+            let vert_pos = vert.get_position();
             if vert_pos.z < 0.0 {
                 return 0;
             }

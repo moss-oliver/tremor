@@ -67,10 +67,6 @@ pub struct Texture {
     pub name: String, //16 bytes
     pub width: u32,
     pub height: u32,
-    //pub offset1: u32,
-    //pub offset2: u32,
-    //pub offset4: u32,
-    //pub offset8: u32
     pub mip1: Vec<u8>,
     pub mip2: Vec<u8>,
     pub mip4: Vec<u8>,
@@ -136,9 +132,6 @@ impl Bsp {
                 let x = read_f32(file);
                 let z = read_f32(file);
                 let y = read_f32(file);
-                //println!("vert {:?} x: {:?}", v, x);
-                //println!("vert {:?} y: {:?}", v, y);
-                //println!("vert {:?} z: {:?}", v, z);
                 vertices.push(Vector3::new(x,y,z));
             }
         }

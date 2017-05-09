@@ -31,8 +31,7 @@ impl TimeEventPump {
 
     fn get_next_time_event(&mut self) -> TimeEvent {
         let ns_in_second = 1000000000;
-        let update_rate = ns_in_second / 30;//40; //Set to 40 for even rounding.
-        //let update_rate = ns_in_second *2;//40; //Set to 40 for even rounding.
+        let update_rate = ns_in_second / 30;
 
         //Get time in NS now
         let time_now = Instant::now();
