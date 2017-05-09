@@ -39,6 +39,7 @@ use std::cell::RefCell;
 use std::any::Any;
 use std::cmp;
 use std::f32;
+use std::env;
 
 pub mod input;
 pub mod pak_loader;
@@ -97,10 +98,6 @@ pub struct State {
 
 pub fn init() -> State {
     //init renderer
-    //let vs = TransformVertexShader{world_proj: Matrix4::identity()};
-    //let ps = SolidColorPixelShader{color: Color::new(255,0,0)};
-    //let vs = TransformVertexShader::<ColoredVertex>::new(Matrix4::identity());
-    //let ps = ColorPixelShader{};
     let vs = TransformVertexShader::<ColoredVertex>::new(Matrix4::identity());
     let ps = ColorPixelShader{};
 
@@ -108,20 +105,32 @@ pub fn init() -> State {
 
     let vs2 = TransformVertexShader::<TexturedVertex>::new(Matrix4::identity());
     
-    /*let mut tex = ColorBuffer::new(16,16);
-    tex.set_pixel(0,0, Color::new(0,0,0));
-    tex.set_pixel(1,0, Color::new(255,0,0));
-    tex.set_pixel(0,1, Color::new(0,255,0));
-    tex.set_pixel(1,1, Color::new(255,255,0));
-    tex.set_pixel(14,14, Color::new(255,255,255));*/
-
-    //let ps2 = TexturePixelShader{texture: tex};
-
     let pipe2 = Pipeline { vs: Option::Some(vs2), ps: Option::None, masker: Option::Some(DepthPixelMasker::new())};
-    //Pipeline::new(vs2,Option::None, DepthPixelMasker::new());
+
+    let filepath: String;
+    let inner_filepath: String;
+    
+    let mut args = env::args();
+    args.next();
+    match args.next() {
+        Some(expr) => {
+            filepath = expr;
+        },
+        None => {
+            filepath = "C:\\Personal\\Quake\\Id1\\PAK0.PAK".to_string();
+        },
+    }
+    match args.next() {
+        Some(expr) => {
+            inner_filepath = expr;
+        },
+        None => {
+            inner_filepath = "maps/e1m2.bsp".to_string();
+        },
+    }
 
     //load pak
-    let file = pak_loader::Pak::from_file("C:\\Personal\\Quake\\Id1\\PAK0.PAK");
+    let file = pak_loader::Pak::from_file(filepath);
     
     println!("header id: {:?}", String::from_utf8( file.header.id.to_vec() ).unwrap());
     for f in &file.files {
@@ -130,11 +139,11 @@ pub fn init() -> State {
 
     let lump_file_entry = file.find_file("gfx/palette.lmp".to_string()).expect("Failed to load file");
     let mut lump_file = file.open_file(lump_file_entry.clone());
-    let mut map_file = file.open_file(file.find_file("maps/e1m1.bsp".to_string()).expect("Failed to load file"));
+    let mut map_file = file.open_file(file.find_file(inner_filepath.clone()).expect("Failed to load file"));
     let mut file = file_bsp::Bsp::load_bsp(&mut map_file);
     let lump = file_lmp::ColorLump::load_lmp(lump_file_entry, &mut lump_file);
 
-    println!("e1m1 offset: {:?}", map_file.baseOffset);
+    println!("{:?} offset: {:?}", inner_filepath, map_file.baseOffset);
 
     println!("file.header.entities.offset: {:?}", file.header.entities.offset);
     println!("file.header.entities.length: {:?}", file.header.entities.length);
@@ -154,48 +163,13 @@ pub fn init() -> State {
     println!("file.header.ledges.offset: {:?}", file.header.ledges.offset);
     println!("file.header.models.offset: {:?}", file.header.models.offset);
     println!("file.header.models.length: {:?}", file.header.models.length);
-    
-
     println!("state.level.faces.len(): {:?}", file.faces.len());
+
     for face_count in 0..file.faces.len() {
         let face = &file.faces[face_count];
         
         let face_offset = face.edge_index / 4;
-        //let vert1 = face.
-        //Tri::new(
-        //    ColoredVertex::new(,0.0,255.0,255.0),
-        //    ColoredVertex::new(vert2.x,vert2.y,vert2.z,0.0,255.0,255.0),
-        //    ColoredVertex::new(vert3.x,vert3.y,vert3.z,0.0,255.0,255.0)
-        //)
-        
-        //println!("face.edge_count: {:?}", face.edge_count);
         let face_texinfo = &file.texture_info[face.tex_info_id as usize];
-        //println!("face.texture_id: {:?}", face_texinfo.texture_id);
-
-        //let e1 = &file.edges[0]
-        //let v1 = &file.vertices[ file.edges[edge as usize].vert1 as usize ];
-        //for edge in 1..face.edge_count-2 {
-            //let v2 = &file.vertices[ file.edges[(face.edge_index /4 ) + edge as usize].vert1 as usize ];
-            //let v3 = &file.vertices[ file.edges[(face.edge_index /4 ) + edge as usize].vert2 as usize ];
-            //let e2 = &file.edges[(edge-1) as usize];
-            //let e3 = &file.edges[edge as usize];
-            /*Tri::new(
-                ColoredVertex::new(v1.x,v1.y,v1.z ,0.0,255.0,255.0),
-                ColoredVertex::new(v2.x,v2.y,v2.z,255.0,0.0,255.0),
-                ColoredVertex::new(v3.x,v3.y,v3.z,255.0,255.0,0.0)
-            );*/
-            //unimplemented!();
-        //}
-
-        /*println!("({:?},{:?}),({:?},{:?}),({:?},{:?}), ({:?},{:?}),({:?},{:?}),({:?},{:?})"
-            , file.edges[(face.edge_index+0) as usize].vert1,file.edges[(face.edge_index+0) as usize].vert2
-            , file.edges[(face.edge_index+1) as usize].vert1,file.edges[(face.edge_index+1) as usize].vert2
-            , file.edges[(face.edge_index+2) as usize].vert1,file.edges[(face.edge_index+2) as usize].vert2
-            // tri 2
-            , file.edges[(face.edge_index+3) as usize].vert1,file.edges[(face.edge_index+3) as usize].vert2
-            , file.edges[(face.edge_index+4) as usize].vert1,file.edges[(face.edge_index+4) as usize].vert2
-            , file.edges[(face.edge_index+5) as usize].vert1,file.edges[(face.edge_index+5) as usize].vert2);
-        */
     }
 
     //return state.
@@ -206,8 +180,8 @@ pub fn init() -> State {
         pipeline2: pipe2,
         depthbuffer: Box::new(DepthBufferF32::new(512,512)),
         backbuffer: Box::new(ColorBuffer::new(512,512)),
-        location: cgmath::Vector3::new(0.0,0.0,2.0),
-        pitch: 0.0,
+        location: cgmath::Vector3::new(-117.0, 129.55736, -183.12213),//(0.0,0.0,2.0),
+        pitch: 52.0,
         yaw: 180.0
     }
 }
@@ -259,6 +233,10 @@ pub fn update(state: &mut State, input: &input::InputManager) {
     if input.is_key_down(input::KeyboardKey::D) {
         state.location += rot.transform_vector(cgmath::Vector3::new(-1.5,0.0,0.0))
     }
+    //println!("UPDATED VIEW:");
+    //println!("LOCATION: {:?}", state.location);
+    //println!("PITCH: {:?}", state.pitch);
+    //println!("YAW: {:?}", state.yaw);
 }
 
 fn min<T:PartialOrd>(a:T,b:T)->T { if a<b{a}else{b}}

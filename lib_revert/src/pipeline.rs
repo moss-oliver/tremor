@@ -315,7 +315,7 @@ impl<'a, V, VS, RV, PS, BB:'a, BP, MS, MB:'a, MP> PipelineSession<'a, V, VS, RV,
         let miny = cmp::max(cmp::min(cmp::min(y1 as i32, cmp::min(y2 as i32, y3 as i32)),self.buff.get_height() as i32),0) as i32;
         let maxy = cmp::max(cmp::min(cmp::max(y1 as i32, cmp::max(y2 as i32, y3 as i32))+1,self.buff.get_height() as i32),0) as i32;
 
-        // Constant part of half-edge functions
+        
         let c1 = dy12 * x1 - dx12 * y1;
         let c2 = dy23 * x2 - dx23 * y2;
         let c3 = dy31 * x3 - dx31 * y3;

@@ -128,16 +128,13 @@ impl Seek for PakFile {
                 if offset > self.fileLength {
                     return Err(Error::new(ErrorKind::UnexpectedEof, "Seek out of file."));
                 }
-                println!("seeking to: {:?}", offset+self.baseOffset);
                 SeekFrom::Start(offset+self.baseOffset)
             },
             SeekFrom::End(offset) => {
                 return Err(Error::new(ErrorKind::Other, "Unsupported seekfrom."));
-                //SeekFrom::End(offset+self.baseOffset as i64)
             },
             SeekFrom::Current(offset) => {
                 return Err(Error::new(ErrorKind::Other, "Unsupported seekfrom."));
-                //SeekFrom::Current(offset+self.baseOffset as i64)
             }
         };
         self.file.seek(adjpos)

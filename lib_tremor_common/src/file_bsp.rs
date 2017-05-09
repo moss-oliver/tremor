@@ -234,7 +234,7 @@ impl Bsp {
             for pat in 0..numtex {
                 offset.push(read_i32(file));
             }
-            //println!("!!!!! NUMTEX: {:?}", numtex);
+            println!("Number of textures: {:?}", numtex);
             texture_list_header = TextureListHeader {
                 numtex : numtex,
                 offset : offset
@@ -245,59 +245,87 @@ impl Bsp {
         {
             let list = &(texture_list_header.offset);
             for off in list {
-                let seek_val = file.seek(SeekFrom::Start(header.miptex.offset + *off as u64));
-                
-                let mut tex_name = [0u8;16];
-                file.read_exact(&mut tex_name).expect("Opened texture, but failed to read name.");
-                
-                let chars_to_trim: &[char] = &[0u8 as char];
-                let converted_name = String::from_utf8_lossy( &tex_name );
-                let formatted_name : String = converted_name[0..converted_name.find(chars_to_trim).unwrap()].to_string();
+                if *off >= 0 {
+                    let seek_val = file.seek(SeekFrom::Start(header.miptex.offset + *off as u64));
+                    
+                    let mut tex_name = [0u8;16];
+                    file.read_exact(&mut tex_name).expect("Opened texture, but failed to read name.");
+                    
+                    let chars_to_trim: &[char] = &[0u8 as char];
+                    let converted_name = String::from_utf8_lossy( &tex_name );
+                    let formatted_name : String = converted_name[0..converted_name.find(chars_to_trim).unwrap()].to_string();
+                    println!("Loading texture: {:?}", formatted_name);
 
-                let w = read_u32(file);
-                let h = read_u32(file);
-                
-                //println!("!!!!!!!!!!!!!! texname: {:?} - w:{:?}, h:{:?}", converted_name, w, h);
-                
-                let off1 = read_u32(file);
-                let off2 = read_u32(file);
-                let off4 = read_u32(file);
-                let off8 = read_u32(file);
-                let len1 = w*h;
-                let len2 = w*h/2;
-                let len4 = w*h/4;
-                let len8 = w*h/8;
+                    let w = read_u32(file);
+                    let h = read_u32(file);
+                    
+                    let off1 = read_u32(file);
+                    let off2 = read_u32(file);
+                    let off4 = read_u32(file);
+                    let off8 = read_u32(file);
+                    let len1 = w*h;
+                    let len2 = w*h/2;
+                    let len4 = w*h/4;
+                    let len8 = w*h/8;
 
-                let mut tex1 : Vec<u8> = Vec::with_capacity(len1 as usize);
-                {
-                    let tex1_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off1 as u64));
-                    for pat in 0..len1 {
-                        tex1.push(read_u8(file));
+                    let mut tex1 : Vec<u8> = Vec::with_capacity(len1 as usize);
+                    {
+                        let tex1_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off1 as u64));
+                        for pat in 0..len1 {
+                            tex1.push(read_u8(file));
+                        }
                     }
-                }
-                let mut tex2 : Vec<u8> = Vec::with_capacity(len2 as usize);
-                {
-                    let tex2_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off2 as u64));
-                    for pat in 0..len2 {
-                        tex2.push(read_u8(file));
+                    let mut tex2 : Vec<u8> = Vec::with_capacity(len2 as usize);
+                    {
+                        let tex2_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off2 as u64));
+                        for pat in 0..len2 {
+                            tex2.push(read_u8(file));
+                        }
                     }
-                }
-                let mut tex4 : Vec<u8> = Vec::with_capacity(len4 as usize);
-                {
-                    let tex4_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off4 as u64));
-                    for pat in 0..len4 {
-                        tex4.push(read_u8(file));
+                    let mut tex4 : Vec<u8> = Vec::with_capacity(len4 as usize);
+                    {
+                        let tex4_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off4 as u64));
+                        for pat in 0..len4 {
+                            tex4.push(read_u8(file));
+                        }
                     }
-                }
-                let mut tex8 = Vec::with_capacity(len8 as usize);
-                {
-                    let tex8_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off8 as u64));
-                    for pat in 0..len8 {
-                        tex8.push(read_u8(file));
+                    let mut tex8 = Vec::with_capacity(len8 as usize);
+                    {
+                        let tex8_seek_val = file.seek(SeekFrom::Start(header.miptex.offset + off8 as u64));
+                        for pat in 0..len8 {
+                            tex8.push(read_u8(file));
+                        }
                     }
-                }
 
-                texture_list.push(Arc::new(Texture {name: formatted_name, width: w, height: h, mip1: tex1, mip2: tex2, mip4: tex4, mip8: tex8}));
+                    texture_list.push(Arc::new(Texture {name: formatted_name, width: w, height: h, mip1: tex1, mip2: tex2, mip4: tex4, mip8: tex8}));
+                } else {
+                    let mut tex1 : Vec<u8> = Vec::with_capacity(8*8);
+                    {
+                        for pat in 0..(8*8) {
+                            tex1.push(0);
+                        }
+                    }
+                    let mut tex2 : Vec<u8> = Vec::with_capacity(4*4);
+                    {
+                        for pat in 0..(4*4) {
+                            tex2.push(0);
+                        }
+                    }
+                    let mut tex4 : Vec<u8> = Vec::with_capacity(2*2);
+                    {
+                        for pat in 0..(2*2) {
+                            tex4.push(0);
+                        }
+                    }
+                    let mut tex8 = Vec::with_capacity(1*1);
+                    {
+                        for pat in 0..(1*1) {
+                            tex8.push(0);
+                        }
+                    }
+
+                    texture_list.push(Arc::new(Texture {name: "NONE".to_string(), width: 8, height: 8, mip1: tex1, mip2: tex2, mip4: tex4, mip8: tex8}));
+                }
             }
         }
 
